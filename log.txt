@@ -1,0 +1,3 @@
+New clock: GstSystemClock
+Ottenuto EOS dall'elemento «pipeline0».
+Execution ended after 2538406654 ns.
