@@ -1,31 +1,5 @@
-/*
- * GStreamer
- * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
- * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
- * Copyright (C) 2009 Marco Ballesio <<user@hostname.org>>
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- *
- * Alternatively, the contents of this file may be used under the
- * GNU Lesser General Public License Version 2.1 (the "LGPL"), in
- * which case the following provisions apply instead of the ones
- * mentioned above:
+/* GStreamer G729 Encoder
+ * Copyright (C) <1999> Erik Walthinsen <omega@cse.ogi.edu>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -43,45 +17,88 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GST_G729ENC_H__
-#define __GST_G729ENC_H__
+
+#ifndef __GST_G729_ENC_H__
+#define __GST_G729_ENC_H__
+
 
 #include <gst/gst.h>
-#include "typedef.h"
-#include "ld8a.h"
+#include <gst/base/gstadapter.h>
 
 G_BEGIN_DECLS
 
-/* #defines don't like whitespacey bits */
-#define GST_TYPE_G729ENC \
-  (gst_g729enc_get_type())
-#define GST_G729ENC(obj) \
-  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_G729ENC,Gstg729enc))
-#define GST_G729ENC_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_G729ENC,Gstg729encClass))
-#define GST_IS_G729ENC(obj) \
-  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_G729ENC))
-#define GST_IS_G729ENC_CLASS(klass) \
-  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_G729ENC))
+#define GST_TYPE_G729_ENC \
+  (gst_g729_enc_get_type())
+#define GST_G729_ENC(obj) \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj),GST_TYPE_G729_ENC,GstG729Enc))
+#define GST_G729_ENC_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_CAST((klass),GST_TYPE_G729_ENC,GstG729EncClass))
+#define GST_IS_G729_ENC(obj) \
+  (G_TYPE_CHECK_INSTANCE_TYPE((obj),GST_TYPE_G729_ENC))
+#define GST_IS_G729_ENC_CLASS(klass) \
+  (G_TYPE_CHECK_CLASS_TYPE((klass),GST_TYPE_G729_ENC))
 
-typedef struct _Gstg729enc      Gstg729enc;
-typedef struct _Gstg729encClass Gstg729encClass;
+#define MAX_FRAME_SIZE 2000*2
+#define MAX_FRAME_BYTES 2000
+#define IN_FRAME_SIZE 80
+#define IN_FRAME_BYTES (IN_FRAME_SIZE*2)
+#define OUT_FRAME_BYTES 10
+#define SAMPLE_RATE 8000
 
-struct _Gstg729enc
+typedef enum
 {
-  GstElement element;
+  GST_G729_ENC_ANNEXA,
+} GstG729Mode;
 
-  GstPad *sinkpad, *srcpad;
+typedef struct _GstG729Enc GstG729Enc;
+typedef struct _GstG729EncClass GstG729EncClass;
 
-  gboolean silent;
+struct _GstG729Enc {
+  GstElement            element;
+
+  /* pads */
+  GstPad                *sinkpad,
+                        *srcpad;
+
+  gint                  packet_count;
+  gint                  n_packets;
+
+  void                  *state;
+  GstG729Mode          mode;
+  GstAdapter            *adapter;
+
+  gboolean              vad;
+  gboolean              dtx;
+
+  gboolean              setup;
+
+  guint64               samples_in;
+  guint64               bytes_out;
+
+  GstTagList            *tags;
+
+  gchar                 *last_message;
+
+  guint64               frameno;
+  guint64               frameno_out;
+
+  guint8                *comments;
+  gint                  comment_len;
+
+  /* Timestamp and granulepos tracking */
+  GstClockTime     start_ts;
+  GstClockTime     next_ts;
+  guint64          granulepos_offset;
 };
 
-struct _Gstg729encClass 
-{
+struct _GstG729EncClass {
   GstElementClass parent_class;
+
+  /* signals */
+  void (*frame_encoded) (GstElement *element);
 };
 
-GType gst_g729enc_get_type (void);
+GType gst_g729_enc_get_type (void);
 
 G_END_DECLS
 
