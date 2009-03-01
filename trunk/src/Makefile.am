@@ -21,25 +21,31 @@ g729_ref_objs=\
 			  $(G729_PATH)/tab_ld8a.o\
 			  $(G729_PATH)/util.o\
 			  $(G729_PATH)/taming.o\
-			  $(G729_PATH)/cor_func.o
+			  $(G729_PATH)/cor_func.o\
+			  $(G729_PATH)/decoder.o\
+			  $(G729_PATH)/de_acelp.o\
+			  $(G729_PATH)/dec_gain.o\
+			  $(G729_PATH)/dec_lag3.o\
+			  $(G729_PATH)/dec_ld8a.o\
+			  $(G729_PATH)/lspdec.o\
+			  $(G729_PATH)/post_pro.o\
+			  $(G729_PATH)/postfilt.o
 
-plugin_LTLIBRARIES = libgstg729enc.la 
-#libgstg729dec.la
+plugin_LTLIBRARIES = libgstg729.la 
 
 # sources used to compile this plug-in
-libgstg729enc_la_SOURCES = gstg729enc.c
-#libgstg729dec_la_SOURCES = gstg729dec.c
+libgstg729_la_SOURCES =gstg729plugin.c gstg729enc.c gstg729dec.c 
 
 # flags used to compile this plugin
 # add other _CFLAGS and _LIBS as needed
-libgstg729enc_la_CFLAGS = $(GST_CFLAGS) $(GST_BASE_CFLAGS) -I $(G729_PATH)
-libgstg729enc_la_LIBADD = $(GST_LIBS) $(GST_BASE_LIBS) libg729_ref.a
+libgstg729_la_CFLAGS = $(GST_CFLAGS) $(GST_BASE_CFLAGS) -I $(G729_PATH)
+libgstg729_la_LIBADD = $(GST_LIBS) $(GST_BASE_LIBS) libg729_ref.a
 
-libgstg729enc_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) -L $(G729_PATH)
-libgstg729enc_la_LIBTOOLFLAGS = --tag=disable-static
+libgstg729_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) -L $(G729_PATH)
+libgstg729_la_LIBTOOLFLAGS = --tag=disable-static
 
 # headers we need but don't want installed
-noinst_HEADERS = gstg729enc.h
+noinst_HEADERS = gstg729enc.h gstg729dec.h g729common.h
 
 $(g729_ref_objs):$(G729_PATH)/coder.mak $(G729_PATH)/decoder.mak
 	make -C $(G729_PATH) -f coder.mak

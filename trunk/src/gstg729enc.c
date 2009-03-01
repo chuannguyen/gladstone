@@ -1,25 +1,3 @@
-/*
- * GladSToNe
- * Copyright (C) 2009 Gibro Vacco <<gibrovacco@gmail.com>>
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- */
 
 /**
  * SECTION:element-g729enc
@@ -46,6 +24,7 @@
 #include <gst/tag/tag.h>
 #include <gst/audio/audio.h>
 #include "gstg729enc.h"
+
 #include "typedef.h"
 #include "ld8a.h"
 
@@ -510,38 +489,6 @@ gst_g729_enc_init (GstG729Enc * enc, GstG729EncClass * klass)
 
 }
 
-#if 0
-static GstBuffer *
-gst_g729_enc_create_metadata_buffer (GstG729Enc * enc)
-{
-  const GstTagList *user_tags;
-  GstTagList *merged_tags;
-  GstBuffer *comments = NULL;
-
-  user_tags = gst_tag_setter_get_tag_list (GST_TAG_SETTER (enc));
-
-  GST_DEBUG_OBJECT (enc, "upstream tags = %" GST_PTR_FORMAT, enc->tags);
-  GST_DEBUG_OBJECT (enc, "user-set tags = %" GST_PTR_FORMAT, user_tags);
-
-  /* gst_tag_list_merge() will handle NULL for either or both lists fine */
-  merged_tags = gst_tag_list_merge (user_tags, enc->tags,
-      gst_tag_setter_get_tag_merge_mode (GST_TAG_SETTER (enc)));
-
-  if (merged_tags == NULL)
-    merged_tags = gst_tag_list_new ();
-
-  GST_DEBUG_OBJECT (enc, "merged   tags = %" GST_PTR_FORMAT, merged_tags);
-  comments = gst_tag_list_to_vorbiscomment_buffer (merged_tags, NULL,
-      0, "Encoded with GStreamer G729enc");
-  gst_tag_list_free (merged_tags);
-
-  GST_BUFFER_OFFSET (comments) = enc->bytes_out;
-  GST_BUFFER_OFFSET_END (comments) = 0;
-
-  return comments;
-}
-#endif
-
 static void
 gst_g729_enc_set_last_msg (GstG729Enc * enc, const gchar * msg)
 {
@@ -564,7 +511,6 @@ gst_g729_enc_setup (GstG729Enc * enc)
   }
 
   /*Initialize G729 encoder */
-  //enc->state = g729_encoder_init (enc->g729_mode);
 
   if (enc->vad) {
     //TODO
@@ -584,24 +530,6 @@ gst_g729_enc_setup (GstG729Enc * enc)
   return TRUE;
 }
 
-#if 0
-/* prepare a buffer for transmission */
-static GstBuffer *
-gst_g729_enc_buffer_from_data (GstG729Enc * enc, guchar * data,
-    gint data_len, guint64 granulepos)
-{
-  GstBuffer *outbuf;
-
-  outbuf = gst_buffer_new_and_alloc (data_len);
-  memcpy (GST_BUFFER_DATA (outbuf), data, data_len);
-  GST_BUFFER_OFFSET (outbuf) = enc->bytes_out;
-  GST_BUFFER_OFFSET_END (outbuf) = granulepos;
-
-  GST_LOG_OBJECT (enc, "encoded buffer of %d bytes", GST_BUFFER_SIZE (outbuf));
-  return outbuf;
-}
-#endif
-
 /* push out the buffer and do internal bookkeeping */
 static GstFlowReturn
 gst_g729_enc_push_buffer (GstG729Enc * enc, GstBuffer * buffer)
@@ -616,47 +544,6 @@ gst_g729_enc_push_buffer (GstG729Enc * enc, GstBuffer * buffer)
 
   return gst_pad_push (enc->srcpad, buffer);
 }
-
-#if 0
-static GstCaps *
-gst_g729_enc_set_header_on_caps (GstCaps * caps, GstBuffer * buf1,
-    GstBuffer * buf2)
-{
-  GstStructure *structure = NULL;
-  GstBuffer *buf;
-  GValue array = { 0 };
-  GValue value = { 0 };
-
-  caps = gst_caps_make_writable (caps);
-  structure = gst_caps_get_structure (caps, 0);
-
-  g_assert (gst_buffer_is_metadata_writable (buf1));
-  g_assert (gst_buffer_is_metadata_writable (buf2));
-
-  /* mark buffers */
-  GST_BUFFER_FLAG_SET (buf1, GST_BUFFER_FLAG_IN_CAPS);
-  GST_BUFFER_FLAG_SET (buf2, GST_BUFFER_FLAG_IN_CAPS);
-
-  /* put buffers in a fixed list */
-  g_value_init (&array, GST_TYPE_ARRAY);
-  g_value_init (&value, GST_TYPE_BUFFER);
-  buf = gst_buffer_copy (buf1);
-  gst_value_set_buffer (&value, buf);
-  gst_buffer_unref (buf);
-  gst_value_array_append_value (&array, &value);
-  g_value_unset (&value);
-  g_value_init (&value, GST_TYPE_BUFFER);
-  buf = gst_buffer_copy (buf2);
-  gst_value_set_buffer (&value, buf);
-  gst_buffer_unref (buf);
-  gst_value_array_append_value (&array, &value);
-  gst_structure_set_value (structure, "streamheader", &array);
-  g_value_unset (&value);
-  g_value_unset (&array);
-
-  return caps;
-}
-#endif
 
 static gboolean
 gst_g729_enc_sinkevent (GstPad * pad, GstEvent * event)
@@ -698,13 +585,13 @@ static gint g729_encode_frame (GstG729Enc* filter, gint16* in, gchar* out){
   extern Word16 *new_speech;
   Word16 prm[PRM_SIZE],serial[SERIAL_SIZE];
 
-  memcpy(new_speech,in,IN_FRAME_BYTES);
+  memcpy(new_speech,in,RAW_FRAME_BYTES);
 
   Pre_Process(new_speech,L_FRAME);
   Coder_ld8a(prm);
   prm2bits_ld8k(prm, serial);
 
-  memset (out,0x0,OUT_FRAME_BYTES);
+  memset (out,0x0,G729_FRAME_BYTES);
 
   for(i=0;i<10;i++){
     for(j=0;j<8;j++){
@@ -713,7 +600,7 @@ static gint g729_encode_frame (GstG729Enc* filter, gint16* in, gchar* out){
     }
   }
 
-  return OUT_FRAME_BYTES;
+  return G729_FRAME_BYTES;
 }
 
 static GstFlowReturn
@@ -721,29 +608,29 @@ gst_g729_enc_encode (GstG729Enc * enc, gboolean flush)
 {
   GstFlowReturn ret = GST_FLOW_OK;
 
-  if (flush && gst_adapter_available (enc->adapter) % IN_FRAME_BYTES != 0) {
-    guint diff = gst_adapter_available (enc->adapter) % IN_FRAME_BYTES;
+  if (flush && gst_adapter_available (enc->adapter) % RAW_FRAME_BYTES != 0) {
+    guint diff = gst_adapter_available (enc->adapter) % RAW_FRAME_BYTES;
     GstBuffer *buf = gst_buffer_new_and_alloc (diff);
 
     memset (GST_BUFFER_DATA (buf), 0, diff);
     gst_adapter_push (enc->adapter, buf);
   }
 
-  while (gst_adapter_available (enc->adapter) >= IN_FRAME_BYTES) {
+  while (gst_adapter_available (enc->adapter) >= RAW_FRAME_BYTES) {
     gint16 *data=NULL;
     gint out=0;
     GstBuffer *outbuf;
 
-    data = (gint16 *) gst_adapter_take (enc->adapter, IN_FRAME_BYTES);
+    data = (gint16 *) gst_adapter_take (enc->adapter, RAW_FRAME_BYTES);
 
-    enc->samples_in += IN_FRAME_SIZE;
+    enc->samples_in += RAW_FRAME_SAMPLES;
 
 
     enc->frameno++;
     enc->frameno_out++;
 
     ret = gst_pad_alloc_buffer_and_set_caps (enc->srcpad,
-        GST_BUFFER_OFFSET_NONE, OUT_FRAME_BYTES, GST_PAD_CAPS (enc->srcpad), &outbuf);
+        GST_BUFFER_OFFSET_NONE, G729_FRAME_BYTES, GST_PAD_CAPS (enc->srcpad), &outbuf);
 
     if ((GST_FLOW_OK != ret))
       goto done;
@@ -751,24 +638,18 @@ gst_g729_enc_encode (GstG729Enc * enc, gboolean flush)
     out = g729_encode_frame (enc, data, (gchar *) GST_BUFFER_DATA (outbuf));
 
     g_free (data);
-    g_assert (out == OUT_FRAME_BYTES);
+    g_assert (out == G729_FRAME_BYTES);
 
     GST_BUFFER_TIMESTAMP (outbuf) = enc->start_ts +
-        gst_util_uint64_scale_int ((enc->frameno_out - 1) * IN_FRAME_SIZE,
+        gst_util_uint64_scale_int ((enc->frameno_out - 1) * RAW_FRAME_SAMPLES,
         GST_SECOND, SAMPLE_RATE);
-    GST_BUFFER_DURATION (outbuf) = gst_util_uint64_scale_int (IN_FRAME_SIZE,
+    GST_BUFFER_DURATION (outbuf) = gst_util_uint64_scale_int (RAW_FRAME_SAMPLES,
         GST_SECOND, SAMPLE_RATE);
     GST_BUFFER_OFFSET_END (outbuf) = enc->granulepos_offset +
-        ((enc->frameno_out) * IN_FRAME_SIZE);
+        ((enc->frameno_out) * RAW_FRAME_SAMPLES);
     GST_BUFFER_OFFSET (outbuf) =
         gst_util_uint64_scale_int (GST_BUFFER_OFFSET_END (outbuf), GST_SECOND,
         SAMPLE_RATE);
-
-    printf("ts:%lu dur:%lu off_end:%lu off:%lu\n",
-        (long unsigned)GST_BUFFER_TIMESTAMP (outbuf),
-        (long unsigned)GST_BUFFER_DURATION (outbuf),
-        (long unsigned)GST_BUFFER_OFFSET_END (outbuf),
-        (long unsigned)GST_BUFFER_OFFSET (outbuf));
 
     ret = gst_g729_enc_push_buffer (enc, outbuf);
 
@@ -835,7 +716,7 @@ gst_g729_enc_chain (GstPad * pad, GstBuffer * buf)
   if (enc->next_ts != GST_CLOCK_TIME_NONE
       && GST_BUFFER_TIMESTAMP_IS_VALID (buf)) {
     guint64 max_diff =
-        gst_util_uint64_scale (IN_FRAME_SIZE, GST_SECOND, SAMPLE_RATE);
+        gst_util_uint64_scale (RAW_FRAME_SAMPLES, GST_SECOND, SAMPLE_RATE);
 
     if (GST_BUFFER_TIMESTAMP (buf) != enc->next_ts &&
         GST_BUFFER_TIMESTAMP (buf) - enc->next_ts > max_diff) {
@@ -981,33 +862,3 @@ gst_g729_enc_change_state (GstElement * element, GstStateChange transition)
 
   return res;
 }
-
-//TODO: element factories?
-static gboolean
-gst_g729_enc_plugin_init (GstPlugin * g729enc)
-{
-    /* debug category for fltering log messages
-     *    */
-    GST_DEBUG_CATEGORY_INIT (g729enc_debug, "g729enc",
-            0, "Template g729enc");
-
-    return gst_element_register (g729enc, "g729enc", GST_RANK_NONE,
-            GST_TYPE_G729_ENC);
-}
-
-
-/* gstreamer looks for this structure to register g729encs
- *
- * exchange the string 'Template g729enc' with your g729enc description
- */
-GST_PLUGIN_DEFINE (
-    GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    "g729codec",
-    "g729 codec elements",
-    gst_g729_enc_plugin_init,
-    VERSION,
-    "LGPL",
-    "GStreamer",
-    "http://gstreamer.net/"
-)
