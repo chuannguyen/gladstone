@@ -10970,10 +10970,10 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   CFLAGS="$save_CFLAGS"
 
   if test "X$flag_ok" = Xyes ; then
-    GST_WALL="yes"
+    GST_WALL="no"
     true
   else
-    GST_WALL="no"
+    GST_WALL="yes"
     true
   fi
   { echo "$as_me:$LINENO: result: $flag_ok" >&5

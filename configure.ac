@@ -34,7 +34,7 @@ AC_PROG_LIBTOOL
 
 
 dnl decide on error flags
-AS_COMPILER_FLAG(-Wall, GST_WALL="yes", GST_WALL="no")
+AS_COMPILER_FLAG(-Wall, GST_WALL="no", GST_WALL="yes")
                                                                                 
 if test "x$GST_WALL" = "xyes"; then
    GST_ERROR="$GST_ERROR -Wall"
