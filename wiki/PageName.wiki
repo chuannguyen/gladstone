@@ -1,14 +1,15 @@
-#summary scope of this project
-= Introduction =
+GladSToNe is an educational tool for learning about hi-performance audio handling for real-time transmissions. The goal of the project is to use the open source model to improve the psycho acoustics, noise shaping and speed of audio transmissions over IP.
 
-The aim of this project is to create an opensource ITU-T G729 compliant codec. Even though first use case will be as a GStreamer element, design and implementation will be done to ease the inclusion in a generic multimedia framework.
+The core is an optimization patch applied on ITU-T reference code (to be downloaded from http://www.itu.int/rec/T-REC-G.729-200701-I/en , the C source is part of the specs). Wrapping around it, encoder and decoder GStreamer elements are provided as well.
 
-Currently there is only a draft heavily based on ITU-T reference code (that must be downloaded apart), wrapping around it to create encoder and decoder GStreamer elements. It has been tested against an n810 and is roughly working. Some minor issues (e.g. suspicious "holes" receiving data from internet tables) must stil be addressed and fixed.
+It has been tested against some industry-grade devices and is roughly working. Some minor issues must still be addressed and fixed.
 
-At this point of development we have thus refence elements to be tested against a custom codec (yet to be done).
+  * *NOTE 1*: before configuring the project you need to download g729 ITU-T specifications (with reference code) and set G729_PATH environment variable to point to a c_code folder (so far only annex A has been tested), e.g.:
 
-    * NOTE 1: before configuring the project you need to download g729 ITU-T specifications (with reference code) and set G729_PATH environment variable to point to a c_code folder, e.g.: 
-
+{{{
 export G729_PATH=/home/gibrovacco/Soft/g729AnnexA/c_code
+}}}
 
-    * NOTE 2: before compiling with GCC the makefiles coder.mak and decoder.mak (in the chosen ITU-T reference code folder) must be modified accordingly (see in the files themself for more hints). 
+  * *NOTE 2*: before compiling with GCC the makefiles _coder.mak_ and _decoder.mak_ (in the chosen ITU-T reference code folder) must be modified accordingly (see in the files themself for more hints).
+
+  * *NOTE 3*: some files in reference code are all upper case.. you should convert them to lower case (I suggest you a combination of _find/awk -or sed-/xargs_).
