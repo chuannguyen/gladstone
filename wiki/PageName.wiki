@@ -1,0 +1,14 @@
+#summary scope of this project
+= Introduction =
+
+The aim of this project is to create an opensource ITU-T G729 compliant codec. Even though first use case will be as a GStreamer element, design and implementation will be done to ease the inclusion in a generic multimedia framework.
+
+Currently there is only a draft heavily based on ITU-T reference code (that must be downloaded apart), wrapping around it to create encoder and decoder GStreamer elements. It has been tested against an n810 and is roughly working. Some minor issues (e.g. suspicious "holes" receiving data from internet tables) must stil be addressed and fixed.
+
+At this point of development we have thus refence elements to be tested against a custom codec (yet to be done).
+
+    * NOTE 1: before configuring the project you need to download g729 ITU-T specifications (with reference code) and set G729_PATH environment variable to point to a c_code folder, e.g.: 
+
+export G729_PATH=/home/gibrovacco/Soft/g729AnnexA/c_code
+
+    * NOTE 2: before compiling with GCC the makefiles coder.mak and decoder.mak (in the chosen ITU-T reference code folder) must be modified accordingly (see in the files themself for more hints). 
