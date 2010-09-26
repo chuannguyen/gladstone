@@ -1,3 +1,8 @@
+Notice on project sources: sources on code.google.com are to be considered obsolete. Even though the project home page will remain here, the sources have moved to gitorious at:
+
+http://gitorious.org/gladstone
+
+-----
 
 The aim of this project is to create an opensource ITU-T G729 compliant codec. Even though the first use case will be as a GStreamer element, design and implementation will be done to ease the inclusion in a generic multimedia framework.
 
