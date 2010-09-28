@@ -17,8 +17,15 @@ AS_VERSION(gst-plugin, GST_PLUGIN_VERSION, 0, 10, 0, 1,
 dnl AM_MAINTAINER_MODE provides the option to enable maintainer mode
 AM_MAINTAINER_MODE
 
+dnl AM_REFCODE_DOWNLOAD provides the option to enable reference code download
+AM_REFCODE_DOWNLOAD
+
 dnl AM_REF_G729_PATH provides the path to reference code
-AC_ARG_VAR(G729_PATH, [path to retrieve g729 libraries and headers])
+AC_ARG_WITH(refcode-prefix,
+  AC_HELP_STRING([--with-refcode-prefix=PFX],
+                 [prefix where reference code is installed, if different from refspec]),
+                 G729_PATH="$withval", 
+                 G729_PATH="$PWD/refcode/Soft/g729AnnexA/c_code")
 AC_SUBST(G729_PATH)
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
@@ -131,5 +138,5 @@ dnl set proper LDFLAGS for plugins
 GST_PLUGIN_LDFLAGS='-module -avoid-version -export-symbols-regex [_]*\(gst_\|Gst\|GST_\).*'
 AC_SUBST(GST_PLUGIN_LDFLAGS)
 
-AC_OUTPUT(Makefile m4/Makefile src/Makefile)
+AC_OUTPUT(Makefile m4/Makefile src/Makefile refcode/Makefile)
 
