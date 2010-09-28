@@ -1,14 +1,29 @@
 
-The aim of this project is to create an opensource ITU-T G729 compliant codec. Even though first use case will be as a GStreamer element, design and implementation will be done to ease the inclusion in a generic multimedia framework.
+The aim of this project is to create an opensource ITU-T G729 compliant codec. Even though the first use case will be as a GStreamer element, design and implementation will be done to ease the inclusion in a generic multimedia framework.
 
-Currently there is only a draft heavily based on ITU-T reference code (that must be downloaded apart), wrapping around it to create encoder and decoder GStreamer elements. It has been tested against an n810 and is roughly working. Some minor issues (e.g. suspicious "holes" receiving data from internet tables) must stil be addressed and fixed.
+Currently the core codec is based on ITU-T reference code (that must be downloaded). The GStreamer elements are wrapping around it to create functional encoder and decoder GStreamer elements.
 
-At this point of development we have thus refence elements to be tested against a custom codec (yet to be done).
+The implementation has been tested with both Farsight and telepathy-stream-engine in ARM and x86 environments on the following platforms:
 
-    * NOTE 1: before configuring the project you need to download g729 ITU-T specifications (with reference code) and set G729_PATH environment variable to point to a c_code folder, e.g.: 
+- Nokia N810 (telepathy-stream-engine)
+- Nokia N900 (telepathy-stream-engine)
+- x86 PC (farsight)
+
+It has been tested against (aka connecting with):
+
+- Nokia n810 (default codecs).
+- N900 (default codecs).
+- Skype.
+- Google talk.
+
+and is roughly working. Some minor issues (e.g. suspicious "holes" receiving data from internet tables) must still be addressed and fixed. Performances are also far from being optimal.
+
+    * NOTE 1: before compiling the project you need to download g729 ITU-T specifications (with reference code) and set G729_PATH environment variable to point to a c_code folder, e.g.: 
 
 export G729_PATH=/home/gibrovacco/Soft/g729AnnexA/c_code
 
-    * NOTE 2: before compiling with GCC the makefiles coder.mak and decoder.mak (in the chosen ITU-T reference code folder) must be modified accordingly (see in the files themself for more hints). 
+    As an alternative, you can use the "--enable-refcode-download" configure option.
+
+    * NOTE 2: prior compiling with GCC the makefiles coder.mak and decoder.mak (in the chosen ITU-T reference code folder) must be modified accordingly (see in the files themself for more hints). This step is automatically performed in case the reference code is downloaded with the "--enable-refcode-download" option.
 
 

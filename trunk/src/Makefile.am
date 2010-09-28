@@ -34,22 +34,22 @@ g729_ref_objs=\
 plugin_LTLIBRARIES = libgstg729.la 
 
 # sources used to compile this plug-in
-libgstg729_la_SOURCES =gstg729plugin.c gstg729enc.c gstg729dec.c 
+libgstg729_la_SOURCES = gstg729plugin.c gstg729enc.c gstg729dec.c 
 
 # flags used to compile this plugin
 # add other _CFLAGS and _LIBS as needed
-libgstg729_la_CFLAGS = $(GST_CFLAGS) $(GST_BASE_CFLAGS) -I $(G729_PATH)
+libgstg729_la_CFLAGS = $(GST_CFLAGS) $(GST_BASE_CFLAGS) -I$(G729_PATH)
 libgstg729_la_LIBADD = $(GST_LIBS) $(GST_BASE_LIBS) libg729_ref.a
 
-libgstg729_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) -L $(G729_PATH)
+libgstg729_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) -L$(G729_PATH)
 libgstg729_la_LIBTOOLFLAGS = --tag=disable-static
 
 # headers we need but don't want installed
 noinst_HEADERS = gstg729enc.h gstg729dec.h g729common.h
 
-$(g729_ref_objs):$(G729_PATH)/coder.mak $(G729_PATH)/decoder.mak
+$(g729_ref_objs) : $(G729_PATH)/coder.mak $(G729_PATH)/decoder.mak
 	make -C $(G729_PATH) -f coder.mak
 	make -C $(G729_PATH) -f decoder.mak
 
-libg729_ref.a:$(g729_ref_objs)
+libg729_ref.a : $(g729_ref_objs)
 	$(AR) r libg729_ref.a $(g729_ref_objs) 
